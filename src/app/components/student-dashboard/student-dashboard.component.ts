@@ -90,33 +90,11 @@ export class StudentDashboardComponent implements OnInit {
       console.log('Imagen copiada al portapapeles. Pégala en el correo.');
       alert('Imagen copiada al portapapeles. Pégala en el correo (Ctrl+V).');
 
-      // 4. Abrir mailto (template según 10. Badges Email ES.md, con formato Markdown)
+      // 4. Abrir mailto (destinatario, asunto y cuerpo con saludo)
       const subject = 'Este es tu badge oficial de IA4Devs. 🏅¿Estás listo para iniciar?';
-      const name = student.fields.Name;
-      const body =
-        `Hola ${name},\n\n` +
-        'Soy el equipo de LIDR, ¡un placer saludarte de nuevo!\n\n' +
-        'Te escribo para contarte que, como parte de tu bienvenida al Bootcamp de Inteligencia Artificial, **hoy tengo algo único y especial que compartir contigo**, y que esperamos te guste mucho :)\n\n' +
-        'Pero, antes de contártelo, me gustaría darte de nuevo las **gracias** en nombre de todo el equipo de LIDR:\n\n' +
-        '* Por **apostar** por nuestro equipo, mentores y metodología.\n' +
-        '* Por **confiar** en nosotros para ayudarte a exprimir al máximo la IA y a integrar en tu día a día como Developer.\n' +
-        '* Por **creer** en ti y en nuestra Comunidad de Alumni, nuestra tribu, en la que siempre podrás confiar tus dudas, inquietudes y retos del día a día.\n\n' +
-        '**Nuestro compromiso es estar cuándo, dónde y cómo sea necesario a tu lado**, esperamos hacer honor a nuestras palabras :)\n\n' +
-        'Y, ahora sí, te cuento:\n\n' +
-        'En este email te adjunto un **badge virtual personalizado** que he preparado para ti.\n\n' +
-        '(Pega aquí tu badge con Ctrl+V)\n\n' +
-        'Este badge **puedes compartirlo a través de LinkedIn** y explicarle a tu red el propósito de lo que pretendes conseguir con el Bootcamp, hacia dónde quieres llegar, o cualquier reflexión que consideres puede ayudar a tu entorno (además de que queda genial para mejorar la marca personal!).\n\n' +
-        'Además, **si lo compartes con tu red nos ayudarás** a amplificar la difusión de este Bootcamp y podremos ayudar a más personas como tú a dominar la IA en su día a día como Developer.\n\n' +
-        '💡 **Si necesitas alguna idea de qué texto compartir, quizás esto te ayude:**\n\n' +
-        '¡Estoy feliz de ser parte de AI4Devs, el Master #1 de Inteligencia Artificial para Developers en español de @Lidr.co | Training great Tech Leaders porque me va a ayudar a...\n\n' +
-        '… Y no olvides añadir el hashtag oficial: #FollowtheLIDR\n\n' +
-        '¿Qué te parece el badge, te gusta?\n\n' +
-        'Si tienes cualquier duda o sugerencia, te leeré encantado :)\n\n' +
-        'Un saludo!\n\n' +
-        'El equipo de LIDR\n\n' +
-        '**¿Te atreves a contarle al mundo sobre tu nueva misión?**';
+      const body = `Hola ${student.fields.Name},\n\n`;
       const mailto = `mailto:${student.fields.Email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = mailto;
+      window.open(mailto, '_blank');
 
       // Marcar badge como enviado en Airtable y actualizar estado local
       this.airtable.markBadgeAsSent(student.id).subscribe({
