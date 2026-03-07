@@ -118,6 +118,18 @@ export class StudentDashboardComponent implements OnInit {
       const mailto = `mailto:${student.fields.Email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.location.href = mailto;
 
+      // Marcar badge como enviado en Airtable y actualizar estado local
+      this.airtable.markBadgeAsSent(student.id).subscribe({
+        next: (updated) => {
+          this.students.update((list) =>
+            list.map((s) => (s.id === updated.id ? updated : s))
+          );
+        },
+        error: (err) => {
+          console.error('Error al actualizar Airtable (marcar badge enviado)', err);
+          alert('El correo se abrió correctamente, pero no se pudo marcar el badge como enviado en la base de datos. Puedes intentar de nuevo más tarde.');
+        },
+      });
     } catch (err) {
       console.error('Error al copiar badge o abrir correo', err);
       alert('Error al generar/copiar la imagen. Revisa la consola.');

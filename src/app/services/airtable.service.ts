@@ -38,6 +38,14 @@ export class AirtableService {
     );
   }
 
+  /**
+   * Marca el badge como enviado para un registro. Realiza PATCH y retorna el registro actualizado.
+   */
+  markBadgeAsSent(recordId: string): Observable<AirtableRecord> {
+    const url = `${this.baseUrl}/${recordId}`;
+    return this.http.patch<AirtableRecord>(url, { fields: { Badge: true } }, { headers: this.headers });
+  }
+
   private fetchPage(url: string): Observable<AirtableResponse> {
     return this.http.get<AirtableResponse>(url, { headers: this.headers });
   }
