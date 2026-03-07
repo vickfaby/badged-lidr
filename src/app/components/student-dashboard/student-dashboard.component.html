@@ -1,0 +1,73 @@
+@if (loading()) {
+  <p class="text-center py-8 text-gray-500">Cargando alumnos…</p>
+} @else if (error()) {
+  <div class="max-w-md mx-auto p-6 mt-8 text-center">
+    <p class="text-red-600 font-medium">Error al cargar los datos</p>
+    <p class="text-gray-600 text-sm mt-2">{{ error() }}</p>
+    <p class="text-gray-500 text-xs mt-4">
+      Revisa <code class="bg-gray-100 px-1 rounded">src/environments/environment.ts</code> y que el token tenga acceso a la base.
+    </p>
+  </div>
+} @else {
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+    @for (student of students(); track student.id; let i = $index) {
+      @let canGenerate = canGenerateBadge(student);
+      @let isManuallyDisabled = manuallyDisabled().has(student.id);
+      @let alreadySent = student.fields.Badge === true;
+      <article
+        class="border rounded-lg overflow-hidden bg-white shadow-sm transition-shadow relative {{
+          canGenerate ? 'hover:shadow-md' : 'opacity-75'
+        }}"
+      >
+        <span
+          class="absolute top-2 left-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-800 text-sm font-medium text-white"
+        >
+          {{ i + 1 }}
+        </span>
+        <div class="aspect-square bg-gray-100 relative flex items-center justify-center overflow-hidden">
+          <div class="absolute inset-0 flex items-center justify-center" style="transform: scale(0.3); transform-origin: center center;">
+            <app-student-badge [student]="student" />
+          </div>
+          @if (!canGenerate) {
+            <span
+              class="absolute inset-0 flex items-center justify-center text-sm font-medium rounded-lg {{
+                alreadySent
+                  ? 'bg-green-900/50 text-white'
+                  : 'bg-black/40 text-white'
+              }}"
+            >
+              {{ alreadySent ? 'Ya se envió el badge' : 'No disponible para badge' }}
+            </span>
+          }
+        </div>
+        <div class="p-4">
+          <h3 class="font-semibold text-lg">
+            {{ student.fields.Name }} {{ student.fields.Surname }}
+          </h3>
+          <p class="text-gray-600 text-sm mt-1">{{ student.fields.Email }}</p>
+          <button
+            type="button"
+            (click)="canGenerate && processBadge(student)"
+            [disabled]="!canGenerate"
+            class="mt-2 w-full py-2 px-4 rounded-md transition-colors {{
+              canGenerate
+                ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+                : alreadySent
+                  ? 'bg-green-600 text-green-100 cursor-not-allowed'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }}"
+          >
+            {{ canGenerate ? 'Generar y Enviar Badge' : (alreadySent ? 'Ya se envió el badge' : 'Badge no disponible') }}
+          </button>
+          <button
+            type="button"
+            (click)="toggleDisable(student.id)"
+            class="mt-2 w-full py-1.5 px-3 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            {{ isManuallyDisabled ? 'Habilitar' : 'Deshabilitar' }}
+          </button>
+        </div>
+      </article>
+    }
+  </div>
+}

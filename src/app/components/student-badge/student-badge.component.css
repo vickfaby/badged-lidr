@@ -1,0 +1,190 @@
+:host {
+  display: block;
+  font-family: 'Inter', sans-serif;
+}
+
+.card {
+  width: 1080px;
+  height: 1080px;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-border {
+  position: absolute;
+  inset: 30px;
+  background: linear-gradient(160deg, #b8860b 0%, #d4a843 15%, #f5e6a3 30%, #d4a843 45%, #b8860b 55%, #d4a843 70%, #f5e6a3 85%, #d4a843 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.card-border::after {
+  content: '';
+  position: absolute;
+  inset: 2.5px;
+  background: #000;
+}
+
+.badge {
+  position: absolute;
+  top: 42px;
+  left: 42px;
+  width: 160px;
+  height: 160px;
+  z-index: 3;
+}
+
+.badge .badge-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.badge .badge-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.badge .badge-icon {
+  position: absolute;
+  inset: 18px;
+  width: calc(100% - 36px);
+  height: calc(100% - 36px);
+}
+
+.badge .badge-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.top-name {
+  position: absolute;
+  top: 40px;
+  left: 180px;
+  z-index: 2;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #d4a843;
+  letter-spacing: 0.3px;
+}
+
+.profile-photo {
+  position: absolute;
+  top: 132px;
+  left: 320px;
+  width: 440px;
+  height: 440px;
+  z-index: 2;
+}
+
+.profile-photo .profile-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.profile-photo .profile-ring img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-photo .profile-img {
+  position: absolute;
+  inset: 14px;
+  width: calc(100% - 28px);
+  height: calc(100% - 28px);
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 4px solid #000;
+}
+
+.name-bar {
+  position: absolute;
+  top: 590px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 40px;
+  border-radius: 4px;
+  overflow: hidden;
+  min-width: 460px;
+  justify-content: center;
+}
+
+.name-bar-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.name-bar-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.name-bar .lidr-icon {
+  height: 34px;
+  width: auto;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.name-bar .name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #000;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+}
+
+.slogan {
+  position: absolute;
+  top: 690px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 49px;
+  line-height: 100%;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #fff;
+  width: 820px;
+  max-width: 90%;
+}
+
+.logo-footer {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.logo-footer img {
+  height: 80px;
+  width: auto;
+  display: block;
+}
