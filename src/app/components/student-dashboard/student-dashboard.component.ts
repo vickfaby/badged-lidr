@@ -22,6 +22,30 @@ export class StudentDashboardComponent implements OnInit {
   error = signal<string | null>(null);
   /** IDs de alumnos deshabilitados manualmente por el usuario */
   manuallyDisabled = signal<Set<string>>(new Set());
+  /** URLs de foto reemplazadas por el usuario (studentId -> data URL) */
+  photoOverrides = signal<Map<string, string>>(new Map());
+
+  /** Abre el selector de archivo para cambiar la foto del alumno. */
+  editPhoto(student: AirtableRecord): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e: Event) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        this.photoOverrides.update((m) => {
+          const next = new Map(m);
+          next.set(student.id, dataUrl);
+          return next;
+        });
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  }
 
   @ViewChildren(StudentBadgeComponent) badgeComponents!: QueryList<StudentBadgeComponent>;
 
@@ -79,18 +103,13 @@ export class StudentDashboardComponent implements OnInit {
       // 1. Generar imagen en Base64
       const dataUrl = await badgeComp.generateBadgeImage();
 
-      // 2. Convertir Base64 a Blob
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
+      // 2. Descargar la imagen
+      const link = document.createElement('a');
+      link.download = `badge-${student.fields.Name}-${student.fields.Surname}.png`;
+      link.href = dataUrl;
+      link.click();
 
-      // 3. Copiar al portapapeles
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob }),
-      ]);
-      console.log('Imagen copiada al portapapeles. Pégala en el correo.');
-      alert('Imagen copiada al portapapeles. Pégala en el correo (Ctrl+V).');
-
-      // 4. Abrir mailto (destinatario, asunto y cuerpo con saludo)
+      // 3. Abrir mailto (destinatario, asunto y cuerpo con saludo)
       const subject = 'Este es tu badge oficial de IA4Devs. 🏅¿Estás listo para iniciar?';
       const body = `Hola ${student.fields.Name},\n\n`;
       const mailto = `mailto:${student.fields.Email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -109,8 +128,8 @@ export class StudentDashboardComponent implements OnInit {
         },
       });
     } catch (err) {
-      console.error('Error al copiar badge o abrir correo', err);
-      alert('Error al generar/copiar la imagen. Revisa la consola.');
+      console.error('Error al generar/descargar badge o abrir correo', err);
+      alert('Error al generar o descargar la imagen. Revisa la consola.');
     }
   }
 

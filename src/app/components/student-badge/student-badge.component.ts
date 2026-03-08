@@ -16,11 +16,13 @@ import { AirtableRecord } from '../../models/student.model';
 })
 export class StudentBadgeComponent {
   @Input() student!: AirtableRecord;
+  /** Si se proporciona, se usa en lugar de la foto de Airtable (p. ej. edición local). */
+  @Input() photoOverride?: string;
 
   @ViewChild('badgeElement') badgeElement!: ElementRef<HTMLElement>;
 
   get photoUrl(): string {
-    return this.student?.fields?.Pic?.[0]?.url ?? '';
+    return this.photoOverride ?? this.student?.fields?.Pic?.[0]?.url ?? '';
   }
 
   async generateBadgeImage(): Promise<string> {

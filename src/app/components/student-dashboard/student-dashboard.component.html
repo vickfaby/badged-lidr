@@ -26,7 +26,10 @@
         </span>
         <div class="aspect-square bg-gray-100 relative flex items-center justify-center overflow-hidden">
           <div class="absolute inset-0 flex items-center justify-center" style="transform: scale(0.3); transform-origin: center center;">
-            <app-student-badge [student]="student" />
+            <app-student-badge
+              [student]="student"
+              [photoOverride]="photoOverrides().get(student.id)"
+            />
           </div>
           @if (!canGenerate) {
             <span
@@ -58,6 +61,13 @@
             }}"
           >
             {{ canGenerate ? 'Generar y Enviar Badge' : (alreadySent ? 'Ya se envió el badge' : 'Badge no disponible') }}
+          </button>
+          <button
+            type="button"
+            (click)="editPhoto(student)"
+            class="mt-2 w-full py-1.5 px-3 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Editar foto
           </button>
           <button
             type="button"
