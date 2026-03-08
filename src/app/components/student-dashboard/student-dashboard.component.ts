@@ -9,6 +9,12 @@ import { AirtableService } from '../../services/airtable.service';
 import { AirtableRecord } from '../../models/student.model';
 import { StudentBadgeComponent } from '../student-badge/student-badge.component';
 
+function isHeic(file: File): boolean {
+  const type = (file.type || '').toLowerCase();
+  const name = (file.name || '').toLowerCase();
+  return type === 'image/heic' || type === 'image/heif' || name.endsWith('.heic') || name.endsWith('.heif');
+}
+
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
@@ -25,24 +31,39 @@ export class StudentDashboardComponent implements OnInit {
   /** URLs de foto reemplazadas por el usuario (studentId -> data URL) */
   photoOverrides = signal<Map<string, string>>(new Map());
 
-  /** Abre el selector de archivo para cambiar la foto del alumno. */
+  /** Abre el selector de archivo para cambiar la foto del alumno. Soporta HEIC (se convierte a JPEG). */
   editPhoto(student: AirtableRecord): void {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e: Event) => {
+    input.accept = 'image/*,.heic,.heif,image/heic,image/heif';
+    input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result as string;
+      const setPhoto = (dataUrl: string) => {
         this.photoOverrides.update((m) => {
           const next = new Map(m);
           next.set(student.id, dataUrl);
           return next;
         });
       };
-      reader.readAsDataURL(file);
+      if (isHeic(file)) {
+        try {
+          const heic2any = (await import('heic2any')).default;
+          const result = await heic2any({ blob: file, toType: 'image/jpeg' });
+          const blob = Array.isArray(result) ? result[0] : result;
+          const reader = new FileReader();
+          reader.onload = () => setPhoto(reader.result as string);
+          reader.readAsDataURL(blob);
+        } catch {
+          const reader = new FileReader();
+          reader.onload = () => setPhoto(reader.result as string);
+          reader.readAsDataURL(file);
+        }
+      } else {
+        const reader = new FileReader();
+        reader.onload = () => setPhoto(reader.result as string);
+        reader.readAsDataURL(file);
+      }
     };
     input.click();
   }

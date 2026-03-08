@@ -22,7 +22,15 @@ export class StudentBadgeComponent {
   @ViewChild('badgeElement') badgeElement!: ElementRef<HTMLElement>;
 
   get photoUrl(): string {
-    return this.photoOverride ?? this.student?.fields?.Pic?.[0]?.url ?? '';
+    if (this.photoOverride) return this.photoOverride;
+    const pic = this.student?.fields?.Pic?.[0];
+    if (!pic) return '';
+    // Preferir thumbnails (full o large) que suelen ser JPEG/PNG seguros para web,
+    // especialmente si el original es HEIC (que no se ve en navegadores).
+    return pic.thumbnails?.['full']?.url
+      || pic.thumbnails?.['large']?.url
+      || pic.thumbnails?.['small']?.url
+      || pic.url;
   }
 
   async generateBadgeImage(): Promise<string> {
@@ -36,6 +44,7 @@ export class StudentBadgeComponent {
         height: 1080,
         pixelRatio: 1,
         cacheBust: true,
+        skipFonts: true, // evita SecurityError al leer cssRules de Google Fonts (cross-origin)
       });
       return dataUrl;
     } catch (err) {
