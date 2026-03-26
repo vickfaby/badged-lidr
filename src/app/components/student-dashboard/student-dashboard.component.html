@@ -151,23 +151,23 @@
     </p>
   </div>
 } @else {
-  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-3">
+  <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-2 p-2">
     @for (student of students(); track student.id; let i = $index) {
       @let canGenerate = canGenerateBadge(student);
       @let isManuallyDisabled = manuallyDisabled().has(student.id);
       @let alreadySent = isBadgeSent(student);
       <article
-        class="border rounded-lg overflow-hidden bg-white shadow-sm transition-shadow relative {{
+        class="border rounded-md overflow-hidden bg-white shadow-sm transition-shadow relative {{
           canGenerate ? 'hover:shadow-md' : 'opacity-75'
         }}"
       >
         <span
-          class="absolute top-2 left-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-800 text-sm font-medium text-white"
+          class="absolute top-1 left-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-gray-800 text-[10px] font-medium text-white"
         >
           {{ i + 1 }}
         </span>
         <div class="aspect-square bg-gray-100 relative flex items-center justify-center overflow-hidden">
-          <div class="absolute inset-0 flex items-center justify-center" style="transform: scale(0.24); transform-origin: center center;">
+          <div class="absolute inset-0 flex items-center justify-center" style="transform: scale(0.19); transform-origin: center center;">
             <app-student-badge
               [student]="student"
               [photoOverride]="photoOverrides().get(student.id)"
@@ -176,26 +176,27 @@
           </div>
           @if (!canGenerate) {
             <span
-              class="absolute inset-0 flex items-center justify-center text-sm font-medium rounded-lg {{
+              class="absolute inset-0 flex items-center justify-center text-[10px] font-semibold rounded-md text-center px-1 leading-tight {{
                 alreadySent
-                  ? 'bg-green-900/50 text-white'
+                  ? 'bg-green-900/55 text-white'
                   : 'bg-black/40 text-white'
               }}"
             >
-              {{ alreadySent ? 'Ya se envió el badge' : 'No disponible para badge' }}
+              {{ alreadySent ? 'Enviado' : 'No disp.' }}
             </span>
           }
         </div>
-        <div class="p-3">
-          <h3 class="font-semibold text-base leading-snug">
+        <div class="p-1.5">
+          <h3 class="font-semibold text-[11px] leading-tight truncate">
             {{ getStudentDisplayName(student) }}
           </h3>
-          <p class="text-gray-600 text-xs mt-1 truncate">{{ student.fields.Email }}</p>
+          <p class="text-gray-500 text-[10px] mt-0.5 truncate">{{ student.fields.Email }}</p>
+          <!-- Botón principal: generar/enviar -->
           <button
             type="button"
             (click)="canGenerate && processBadge(student)"
             [disabled]="!canGenerate"
-            class="mt-2 w-full py-1.5 px-3 text-sm rounded-md transition-colors {{
+            class="mt-1 w-full py-1 px-1.5 text-[10px] font-medium rounded transition-colors leading-tight {{
               canGenerate
                 ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
                 : alreadySent
@@ -203,70 +204,87 @@
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }}"
           >
-            {{ canGenerate ? 'Generar y Enviar Badge' : (alreadySent ? 'Ya se envió el badge' : 'Badge no disponible') }}
+            {{ canGenerate ? 'Generar y enviar' : (alreadySent ? 'Ya enviado' : 'No disponible') }}
           </button>
 
-          <button
-            type="button"
-            (click)="openPreview(student)"
-            class="mt-2 w-full py-1.5 px-3 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Ver preview
-          </button>
+          <!-- Fila: preview + deshabilitar -->
+          <div class="mt-1 flex gap-1">
+            <button
+              type="button"
+              (click)="openPreview(student)"
+              class="flex-1 py-1 px-1 text-[10px] rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors leading-tight"
+            >
+              Preview
+            </button>
+            <button
+              type="button"
+              (click)="toggleDisable(student.id)"
+              class="flex-1 py-1 px-1 text-[10px] rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors leading-tight"
+            >
+              {{ isManuallyDisabled ? 'Habilitar' : 'Deshab.' }}
+            </button>
+          </div>
 
-          <div class="mt-2 w-full flex items-stretch gap-2">
+          <!-- Fila: editar foto + editar nombre -->
+          <div class="mt-1 flex gap-1">
             <button
               type="button"
               (click)="editPhoto(student)"
-              class="flex-1 py-1.5 px-3 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+              class="flex-1 py-1 px-1 text-[10px] rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors leading-tight"
             >
-              Editar foto
+              Foto
             </button>
             <button
               type="button"
               (click)="startEditName(student)"
-              class="flex-1 py-1.5 px-3 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+              class="flex-1 py-1 px-1 text-[10px] rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors leading-tight"
             >
-              Editar nombre
+              Nombre
             </button>
           </div>
 
+          <!-- Botón: descargar foto -->
+          @if (student.fields.Pic?.length || photoOverrides().get(student.id)) {
+            <button
+              type="button"
+              (click)="downloadPhoto(student)"
+              class="mt-1 w-full py-1 px-1 text-[10px] rounded border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 transition-colors leading-tight flex items-center justify-center gap-1"
+            >
+              <svg class="w-2.5 h-2.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 10l5 5 5-5M12 15V3"/>
+              </svg>
+              Descargar foto
+            </button>
+          }
+
           @if (editingNameForId() === student.id) {
-            <div class="mt-2 rounded-md border border-gray-200 bg-gray-50 p-2">
+            <div class="mt-1 rounded border border-gray-200 bg-gray-50 p-1.5">
               <input
                 type="text"
-                class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-2 py-1 text-[10px] rounded border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 [value]="nameDraft()"
                 (input)="nameDraft.set($any($event.target).value)"
                 (keydown.enter)="saveEditName(student)"
                 (keydown.escape)="cancelEditName()"
               />
-              <div class="mt-2 flex gap-2">
+              <div class="mt-1 flex gap-1">
                 <button
                   type="button"
                   (click)="saveEditName(student)"
-                  class="flex-1 py-1.5 px-3 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  class="flex-1 py-1 text-[10px] rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                 >
-                  Guardar
+                  OK
                 </button>
                 <button
                   type="button"
                   (click)="cancelEditName()"
-                  class="flex-1 py-1.5 px-3 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+                  class="flex-1 py-1 text-[10px] rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
                 >
-                  Cancelar
+                  ✕
                 </button>
               </div>
             </div>
           }
-
-          <button
-            type="button"
-            (click)="toggleDisable(student.id)"
-            class="mt-2 w-full py-1.5 px-3 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            {{ isManuallyDisabled ? 'Habilitar' : 'Deshabilitar' }}
-          </button>
         </div>
       </article>
     }

@@ -98,6 +98,41 @@ export class StudentDashboardComponent implements OnInit {
     this.cancelEditName();
   }
 
+  /** Descarga la fotografía del alumno (override local o URL de Airtable). */
+  async downloadPhoto(student: AirtableRecord): Promise<void> {
+    const override = this.photoOverrides().get(student.id);
+    const name = this.getStudentDisplayName(student).replace(/\s+/g, '_') || student.id;
+    const filename = `foto-${name}.jpg`;
+
+    if (override) {
+      // Ya es un data URL → descarga directa
+      const link = document.createElement('a');
+      link.href = override;
+      link.download = filename;
+      link.click();
+      return;
+    }
+
+    // Obtener URL de Airtable (prefiere thumbnail large para evitar HEIC)
+    const pic = student.fields.Pic?.[0];
+    if (!pic) return;
+    const url = pic.thumbnails?.['large']?.url ?? pic.thumbnails?.['full']?.url ?? pic.url;
+
+    try {
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = filename;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
+    } catch {
+      // Fallback: abrir en nueva pestaña
+      window.open(url, '_blank');
+    }
+  }
+
   /** Abre el selector de archivo para cambiar la foto del alumno. Soporta HEIC (se convierte a JPEG). */
   editPhoto(student: AirtableRecord): void {
     const input = document.createElement('input');
