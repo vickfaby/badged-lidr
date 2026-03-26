@@ -1,3 +1,51 @@
 :host {
   display: block;
 }
+
+.preview-stage {
+  width: 1080px;
+  height: 1080px;
+  transform-origin: top left;
+}
+
+/* Escala responsiva para que el preview no “explote” el modal */
+@media (max-width: 639px) {
+  .preview-stage {
+    transform: scale(0.32);
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .preview-stage {
+    transform: scale(0.42);
+  }
+}
+
+@media (min-width: 1024px) {
+  .preview-stage {
+    transform: scale(0.5);
+  }
+}
+
+.preview-stage-wrap {
+  /* Ajusta el “canvas” al tamaño escalado para centrar correctamente */
+  width: 540px;
+  height: 540px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+@media (max-width: 639px) {
+  .preview-stage-wrap {
+    width: 346px;
+    height: 346px;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .preview-stage-wrap {
+    width: 454px;
+    height: 454px;
+  }
+}

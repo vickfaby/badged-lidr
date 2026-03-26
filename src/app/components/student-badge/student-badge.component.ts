@@ -18,8 +18,18 @@ export class StudentBadgeComponent {
   @Input() student!: AirtableRecord;
   /** Si se proporciona, se usa en lugar de la foto de Airtable (p. ej. edición local). */
   @Input() photoOverride?: string;
+  /** Si se proporciona, se usa en lugar del nombre+apellido (edición local). */
+  @Input() nameOverride?: string;
 
   @ViewChild('badgeElement') badgeElement!: ElementRef<HTMLElement>;
+
+  get displayName(): string {
+    const override = (this.nameOverride ?? '').trim();
+    if (override) return override;
+    const name = (this.student?.fields?.Name ?? '').trim();
+    const surname = (this.student?.fields?.Surname ?? '').trim();
+    return `${name} ${surname}`.trim();
+  }
 
   get photoUrl(): string {
     if (this.photoOverride) return this.photoOverride;

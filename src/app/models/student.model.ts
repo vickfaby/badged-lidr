@@ -60,3 +60,20 @@ export interface AirtableResponse {
   /** Presente cuando hay más registros; usar en la siguiente petición como ?offset=... */
   offset?: string;
 }
+
+/**
+ * Representa una tabla dentro de una base de Airtable (API de Metadatos).
+ */
+export interface AirtableTable {
+  /** ID único de la tabla */
+  id: string;
+  /** Nombre de la tabla tal como aparece en Airtable */
+  name: string;
+}
+
+/**
+ * Respuesta del endpoint de metadatos /meta/bases/{baseId}/tables.
+ */
+export interface AirtableTablesResponse {
+  tables: AirtableTable[];
+}

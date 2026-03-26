@@ -1,0 +1,83 @@
+{
+  "_version": "1.0",
+  "_description": "Platform registry - single source of truth for platform capabilities",
+  "platforms": {
+    "cursor": {
+      "name": "Cursor",
+      "emoji": "🎯",
+      "output_dir": ".cursor",
+      "components": {
+        "rules": { "strategy": "copy-flatten", "extension": ".mdc" },
+        "skills": { "strategy": "symlink" },
+        "commands": { "strategy": "symlink" },
+        "agents": { "strategy": "symlink" },
+        "mcp": { "strategy": "generate", "format": "mcpServers" },
+        "hooks": { "strategy": "generate", "format": "cursor-json" }
+      }
+    },
+    "claude": {
+      "name": "Claude Code",
+      "emoji": "🤖",
+      "output_dir": ".claude",
+      "components": {
+        "rules": { "strategy": "symlink" },
+        "skills": { "strategy": "symlink" },
+        "commands": { "strategy": "symlink" },
+        "agents": { "strategy": "symlink" },
+        "mcp": { "strategy": "generate", "format": "mcpServers" },
+        "hooks": { "strategy": "generate", "format": "claude-settings" }
+      }
+    },
+    "gemini": {
+      "name": "Gemini CLI",
+      "emoji": "💎",
+      "output_dir": ".gemini",
+      "components": {
+        "rules": { "strategy": "generate-index" },
+        "skills": {
+          "strategy": "native",
+          "_note": "Gemini CLI reads .agents/skills/ natively; symlink causes duplicate detection"
+        },
+        "commands": { "strategy": "convert-toml" },
+        "agents": {
+          "strategy": "native",
+          "_note": "Gemini CLI reads .agents/subagents/ natively; symlink causes duplicate detection"
+        },
+        "mcp": { "strategy": "generate", "format": "gemini-settings" },
+        "hooks": { "strategy": "generate", "format": "gemini-settings" }
+      }
+    },
+    "copilot": {
+      "name": "Copilot (VSCode)",
+      "emoji": "🐙",
+      "output_dir": ".github",
+      "mcp_output_dir": ".vscode",
+      "components": {
+        "rules": {
+          "strategy": "copy-flatten",
+          "extension": ".instructions.md",
+          "transform_frontmatter": true,
+          "generate_index": true
+        },
+        "skills": {
+          "strategy": "native",
+          "_note": "VSCode/Copilot reads .agents/skills/ natively; symlink causes duplicate detection"
+        },
+        "commands": { "strategy": "copy-rename", "extension": ".prompt.md" },
+        "agents": { "strategy": "copy-rename", "extension": ".agent.md" },
+        "mcp": { "strategy": "generate", "format": "vscode-servers" },
+        "hooks": { "strategy": "generate", "format": "copilot-json" }
+      }
+    },
+    "antigravity": {
+      "name": "Antigravity",
+      "emoji": "🌌",
+      "output_dir": ".agents",
+      "components": {
+        "rules": { "strategy": "native" },
+        "skills": { "strategy": "native" },
+        "commands": { "strategy": "native-workflows" }
+      }
+    }
+  }
+}

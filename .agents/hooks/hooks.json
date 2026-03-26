@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "description": "Cross-platform hooks for AI-assisted development workflow",
+  "_notes": {
+    "platforms": "Valid values: cursor, claude, gemini, copilot",
+    "cursor_limitation": "Cursor lacks PreToolUse (no blocking). auto-format is 'nice to have', Husky pre-commit guarantees formatting",
+    "copilot_limitation": "Copilot uses same format as Cursor (camelCase events, no Notification)",
+    "sync_behavior": "sync.sh --only=hooks reads 'platforms' field to generate platform-specific configs"
+  },
+  "hooks": {
+    "notify": {
+      "event": "Notification",
+      "matcher": "*",
+      "command": "bash \"${PLUGIN_ROOT}/hooks/scripts/notify.sh\"",
+      "timeout": 5,
+      "platforms": ["claude", "gemini"],
+      "description": "Desktop notifications for task completion"
+    },
+    "auto-format": {
+      "event": "PostToolUse",
+      "matcher": "Edit|Write|write_file|replace",
+      "command": "bash \"${PLUGIN_ROOT}/hooks/scripts/auto-format.sh\"",
+      "timeout": 30,
+      "platforms": ["claude", "gemini", "cursor", "copilot"],
+      "description": "Auto-format files with prettier after edits (Cursor/Copilot: best-effort, Husky guarantees)"
+    },
+    "protect-secrets": {
+      "event": "PreToolUse",
+      "matcher": "Read|read_file|Edit|Write|write_file|replace",
+      "command": "bash \"${PLUGIN_ROOT}/hooks/scripts/protect-secrets.sh\"",
+      "timeout": 10,
+      "platforms": ["claude", "gemini", "copilot"],
+      "description": "Block edits to sensitive files (.env, .key, .pem, etc.)"
+    }
+  }
+}
