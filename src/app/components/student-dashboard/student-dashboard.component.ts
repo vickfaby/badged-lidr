@@ -7,16 +7,12 @@ import {
   signal,
   ViewChildren,
 } from '@angular/core';
+import Cropper from 'cropperjs';
+import 'cropperjs/dist/cropper.css';
 import { AirtableService } from '../../services/airtable.service';
 import { AirtableRecord, AirtableTable } from '../../models/student.model';
 import { StudentBadgeComponent } from '../student-badge/student-badge.component';
 import { environment } from '../../../environments/environment';
-
-function isHeic(file: File): boolean {
-  const type = (file.type || '').toLowerCase();
-  const name = (file.name || '').toLowerCase();
-  return type === 'image/heic' || type === 'image/heif' || name.endsWith('.heic') || name.endsWith('.heif');
-}
 
 @Component({
   selector: 'app-student-dashboard',
@@ -55,6 +51,12 @@ export class StudentDashboardComponent implements OnInit {
   nameDraft = signal<string>('');
   /** Alumno seleccionado para ver preview */
   previewStudent = signal<AirtableRecord | null>(null);
+  /** Alumno seleccionado para encuadrar su foto */
+  cropStudent = signal<AirtableRecord | null>(null);
+  /** URL de la foto a encuadrar */
+  cropImageUrl = signal<string | null>(null);
+  cropLoading = signal(false);
+  private cropper: Cropper | null = null;
 
   /** Estadísticas del cohort actual */
   badgeStats = computed(() => {
@@ -62,8 +64,6 @@ export class StudentDashboardComponent implements OnInit {
     const disabled = this.manuallyDisabled();
     const total = all.length;
     const sent = all.filter(s => this.isBadgeSent(s)).length;
-    const manuallyOff = all.filter(s => !this.isBadgeSent(s) && disabled.has(s.id)).length;
-    const noPic = all.filter(s => !this.isBadgeSent(s) && !disabled.has(s.id) && !s.fields.Pic?.length).length;
     const available = all.filter(s => this.canGenerateBadge(s)).length;
     const unavailable = total - sent - available;
     return { total, sent, available, unavailable };
@@ -114,9 +114,8 @@ export class StudentDashboardComponent implements OnInit {
     }
 
     // Obtener URL de Airtable (prefiere thumbnail large para evitar HEIC)
-    const pic = student.fields.Pic?.[0];
-    if (!pic) return;
-    const url = pic.thumbnails?.['large']?.url ?? pic.thumbnails?.['full']?.url ?? pic.url;
+    const url = this.getBestAirtablePhotoUrl(student);
+    if (!url) return;
 
     try {
       const resp = await fetch(url);
@@ -133,41 +132,76 @@ export class StudentDashboardComponent implements OnInit {
     }
   }
 
-  /** Abre el selector de archivo para cambiar la foto del alumno. Soporta HEIC (se convierte a JPEG). */
+  /** Devuelve la mejor URL de Airtable para trabajar la foto. */
+  private getBestAirtablePhotoUrl(student: AirtableRecord): string | null {
+    const pic = student.fields.Pic?.[0];
+    if (!pic) return null;
+    return pic.thumbnails?.['full']?.url ?? pic.thumbnails?.['large']?.url ?? pic.thumbnails?.['small']?.url ?? pic.url;
+  }
+
+  /** Abre modal para encuadrar la foto del alumno. */
   editPhoto(student: AirtableRecord): void {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*,.heic,.heif,image/heic,image/heif';
-    input.onchange = async (e: Event) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-      const setPhoto = (dataUrl: string) => {
-        this.photoOverrides.update((m) => {
-          const next = new Map(m);
-          next.set(student.id, dataUrl);
-          return next;
-        });
-      };
-      if (isHeic(file)) {
-        try {
-          const heic2any = (await import('heic2any')).default;
-          const result = await heic2any({ blob: file, toType: 'image/jpeg' });
-          const blob = Array.isArray(result) ? result[0] : result;
-          const reader = new FileReader();
-          reader.onload = () => setPhoto(reader.result as string);
-          reader.readAsDataURL(blob);
-        } catch {
-          const reader = new FileReader();
-          reader.onload = () => setPhoto(reader.result as string);
-          reader.readAsDataURL(file);
-        }
-      } else {
-        const reader = new FileReader();
-        reader.onload = () => setPhoto(reader.result as string);
-        reader.readAsDataURL(file);
-      }
-    };
-    input.click();
+    const source = this.getBestAirtablePhotoUrl(student) ?? this.photoOverrides().get(student.id) ?? null;
+    if (!source) return;
+    this.destroyCropper();
+    this.cropStudent.set(student);
+    this.cropImageUrl.set(source);
+    this.cropLoading.set(true);
+  }
+
+  onCropImageLoaded(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (!img) return;
+    this.cropLoading.set(false);
+    this.destroyCropper();
+    this.cropper = new Cropper(img, {
+      aspectRatio: 1,
+      viewMode: 1,
+      dragMode: 'move',
+      autoCropArea: 0.75,
+      guides: false,
+      center: false,
+      highlight: false,
+      background: false,
+      movable: true,
+      zoomable: true,
+      cropBoxMovable: true,
+      cropBoxResizable: true,
+      responsive: true,
+      checkOrientation: false,
+    });
+  }
+
+  closeCropModal(): void {
+    this.destroyCropper();
+    this.cropLoading.set(false);
+    this.cropStudent.set(null);
+    this.cropImageUrl.set(null);
+  }
+
+  applyCrop(): void {
+    const student = this.cropStudent();
+    if (!student || !this.cropper) return;
+    const canvas = this.cropper.getCroppedCanvas({
+      width: 1200,
+      height: 1200,
+      imageSmoothingEnabled: true,
+      imageSmoothingQuality: 'high',
+    });
+    if (!canvas) return;
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+    this.photoOverrides.update((m) => {
+      const next = new Map(m);
+      next.set(student.id, dataUrl);
+      return next;
+    });
+    this.closeCropModal();
+  }
+
+  private destroyCropper(): void {
+    if (!this.cropper) return;
+    this.cropper.destroy();
+    this.cropper = null;
   }
 
   @ViewChildren(StudentBadgeComponent) badgeComponents!: QueryList<StudentBadgeComponent>;
@@ -223,6 +257,7 @@ export class StudentDashboardComponent implements OnInit {
     this.photoOverrides.set(new Map());
     this.nameOverrides.set(new Map());
     this.cancelEditName();
+    this.closeCropModal();
     this.airtable.getStudents(tableName).subscribe({
       next: (records) => {
         const sorted = [...records].sort((a, b) => {
@@ -281,7 +316,8 @@ export class StudentDashboardComponent implements OnInit {
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
-    if (this.previewStudent()) this.closePreview();
+    if (this.cropStudent()) this.closeCropModal();
+    else if (this.previewStudent()) this.closePreview();
     else if (this.editingNameForId()) this.cancelEditName();
     else if (this.tableDropdownOpen()) this.closeTableDropdown();
   }

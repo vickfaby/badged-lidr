@@ -2,6 +2,35 @@
   display: block;
 }
 
+.cropper-stage {
+  position: relative;
+  width: min(900px, calc(100vw - 64px));
+  height: min(70vh, 760px);
+}
+
+.cropper-stage > img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* CropperJS genera nodos dinámicos; usamos ::ng-deep para estilizar el recuadro circular. */
+:host ::ng-deep .cropper-view-box,
+:host ::ng-deep .cropper-face {
+  border-radius: 50%;
+}
+
+:host ::ng-deep .cropper-view-box {
+  outline: 2px solid rgba(255, 255, 255, 0.95);
+  outline-offset: -2px;
+}
+
+:host ::ng-deep .cropper-point {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 1px solid #111827;
+}
+
 .preview-stage {
   width: 1080px;
   height: 1080px;

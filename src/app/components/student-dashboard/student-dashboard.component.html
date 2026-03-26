@@ -225,14 +225,14 @@
             </button>
           </div>
 
-          <!-- Fila: editar foto + editar nombre -->
+          <!-- Fila: encuadrar foto + editar nombre -->
           <div class="mt-1 flex gap-1">
             <button
               type="button"
               (click)="editPhoto(student)"
               class="flex-1 py-1 px-1 text-[10px] rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors leading-tight"
             >
-              Foto
+              Encuadrar foto
             </button>
             <button
               type="button"
@@ -288,6 +288,69 @@
         </div>
       </article>
     }
+  </div>
+}
+
+@if (cropStudent(); as cStudent) {
+  <div
+    class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+    (click)="closeCropModal()"
+  >
+    <div
+      class="w-full max-w-4xl max-h-[92vh] rounded-lg bg-white shadow-xl border border-gray-200 overflow-hidden flex flex-col"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-gray-100">
+        <div class="min-w-0">
+          <div class="text-sm font-semibold text-gray-800 truncate">Encuadrar foto</div>
+          <div class="text-xs text-gray-500 truncate">{{ getStudentDisplayName(cStudent) }}</div>
+        </div>
+        <button
+          type="button"
+          class="shrink-0 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+          (click)="closeCropModal()"
+        >
+          Cerrar
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-auto bg-gray-900/95 p-4">
+        <div class="mx-auto cropper-stage">
+          @if (cropImageUrl(); as url) {
+            <img
+              [src]="url"
+              (load)="onCropImageLoaded($event)"
+              alt="Foto para encuadre"
+              class="block max-w-full"
+            />
+          }
+          @if (cropLoading()) {
+            <div class="absolute inset-0 flex items-center justify-center text-white/80 text-sm font-medium bg-black/30">
+              Cargando imagen...
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="px-4 py-3 border-t border-gray-100 bg-white flex items-center justify-end gap-2">
+        <button
+          type="button"
+          class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+          (click)="closeCropModal()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
+          (click)="applyCrop()"
+        >
+          Guardar encuadre
+        </button>
+      </div>
+    </div>
   </div>
 }
 
