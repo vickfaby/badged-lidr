@@ -56,6 +56,19 @@ export class StudentDashboardComponent implements OnInit {
   /** Alumno seleccionado para ver preview */
   previewStudent = signal<AirtableRecord | null>(null);
 
+  /** Estadísticas del cohort actual */
+  badgeStats = computed(() => {
+    const all = this.students();
+    const disabled = this.manuallyDisabled();
+    const total = all.length;
+    const sent = all.filter(s => this.isBadgeSent(s)).length;
+    const manuallyOff = all.filter(s => !this.isBadgeSent(s) && disabled.has(s.id)).length;
+    const noPic = all.filter(s => !this.isBadgeSent(s) && !disabled.has(s.id) && !s.fields.Pic?.length).length;
+    const available = all.filter(s => this.canGenerateBadge(s)).length;
+    const unavailable = total - sent - available;
+    return { total, sent, available, unavailable };
+  });
+
   getStudentDisplayName(student: AirtableRecord): string {
     const override = this.nameOverrides().get(student.id);
     if (override && override.trim()) return override.trim();
