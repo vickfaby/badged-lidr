@@ -66,13 +66,16 @@
 .top-name {
   position: absolute;
   top: 40px;
-  left: 180px;
+  /* Empieza después del sello circular (≈42+160px) para no solaparse */
+  left: 222px;
+  right: 48px;
   z-index: 2;
   font-family: 'DM Sans', sans-serif;
-  font-size: 18px;
   font-weight: 600;
   color: #d4a843;
   letter-spacing: 0.3px;
+  line-height: 1.15;
+  white-space: nowrap;
 }
 
 .profile-photo {

@@ -31,6 +31,22 @@ export class StudentBadgeComponent {
     return `${name} ${surname}`.trim();
   }
 
+  /**
+   * Tamaño de fuente para el nombre superior: una sola línea, sin solaparse con el sello.
+   * (En la exportación PNG el salto de línea dejaba la 2.ª línea detrás del logo.)
+   */
+  get topNameFontSizePx(): number {
+    const len = this.displayName.length;
+    if (len > 78) return 9;
+    if (len > 62) return 10;
+    if (len > 52) return 11;
+    if (len > 42) return 12;
+    if (len > 34) return 13;
+    if (len > 28) return 14;
+    if (len > 22) return 16;
+    return 18;
+  }
+
   get photoUrl(): string {
     if (this.photoOverride) return this.photoOverride;
     const pic = this.student?.fields?.Pic?.[0];
